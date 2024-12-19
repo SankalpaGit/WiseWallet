@@ -1,5 +1,20 @@
-﻿@page "/login"
+﻿@page "/"
 
-<section class="vh-100 d-flex align-items-center justify-content-center" style="overflow: hidden;">
-    
-</section>
+<div class="container login-container">
+    <div class="row login-card shadow rounded p-4">
+        <!-- Left Side Image -->
+        <div class="col-md-6 login-image text-center">
+            <img src="/login.png" alt="Login" />
+        </div>
+
+        <!-- Right Side Login Form -->
+        <div class="col-md-6">
+            <h3 class="text-center mb-4">Log In</h3>
+            <form method="post">
+                <input type="email" class="form-control" placeholder="Your G-Mail Address" required />
+                <input type="password" class="form-control" placeholder="Password" required />
+                <button type="submit" class="btn login-btn w-100 py-2 rounded">Log In</button>
+            </form>
+        </div>
+    </div>
+</div>

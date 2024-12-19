@@ -1,5 +1,61 @@
-@namespace MauiApp1.Components.Layout
+@namespace WiseWallet.Components.Layout
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-   
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container-fluid">
+        <!-- Left: Project Name -->
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index">Wise Wallet</a>
+
+        <!-- Navbar Toggler -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Center: Links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-orange" asp-controller="Transaction" asp-action="Index">Transaction</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-orange" asp-controller="Debt" asp-action="ViewDebt">View Debt</a>
+                </li>
+            </ul>
+
+            <!-- Right: Profile Circle -->
+            <div class="d-flex">
+                <div class="profile-circle">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
 </nav>
+
+<style>
+    /* Navbar bottom shadow */
+    .navbar {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Orange nav-link */
+    .nav-link {
+        color: orange !important;
+        font-weight: 500; /* Optional: Make the link slightly bold */
+    }
+
+    /* Profile circle icon size */
+    .profile-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa; /* Light gray background */
+    }
+
+    .profile-circle i {
+        font-size: 1.5rem; /* Increase the icon size */
+        color: #6c757d; /* Gray color for the icon */
+    }
+</style>
