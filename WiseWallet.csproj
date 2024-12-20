@@ -57,13 +57,6 @@
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
-    <ItemGroup>
-      <MauiImage Remove="Resources\Images\login.png" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Resources\Images\login.png" />
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />

@@ -1,5 +1,41 @@
 @page "/register"
 
 <section class="vh-100" style="background-color: #f7f7f7;">
-    
+    <div class="container-fluid d-flex align-items-center justify-content-center vh-100">
+        <div class="row login-card p-4 align-items-center w-100 gap-4" style="max-width: 900px; min-height: 500px;">
+            <!-- Left Side Form (on smaller screens, this will be on top, and on larger screens, it will be on the left) -->
+            <div class="col-12 col-md-5 d-flex flex-column justify-content-center">
+                <h3 class="text-center mb-4 fw-bold">Register</h3>
+                <form method="post" class="d-flex flex-column justify-content-center h-100">
+                    <div class="mb-4">
+                        <input type="email" class="form-control" placeholder="Your G-Mail Address" required />
+                    </div>
+                    <div class="mb-4">
+                        <input type="password" class="form-control" placeholder="Password" required />
+                    </div>
+                    <div class="mb-4">
+                        <input type="password" class="form-control" placeholder="Confirm Password" required />
+                    </div>
+                    <div class="mb-4">
+                        <select class="form-select" required>
+                            <option value="" disabled selected>Select Your Currency</option>
+                            <option value="NRS">Nepal (NRS) - &#8363;</option>
+                            <option value="INR">India (INR) - &#8377;</option>
+                            <option value="USD">USA (USD) - &#36;</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn login-btn w-100 py-2 rounded mb-4" style="background-color: #FFD700; color: #000;">
+                        Register
+                    </button>
+                    <p class="text-center">
+                        Already have an account? <a href="/" class="text-decoration-none">Log In</a>
+                    </p>
+                </form>
+            </div>
+
+            <div class="col-md-6 login-image text-center">
+                <img src="/login.png" alt="Login" class="img-fluid" />
+            </div>
+        </div>
+    </div>
 </section>
