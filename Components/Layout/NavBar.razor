@@ -3,7 +3,7 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container-fluid">
         <!-- Left: Project Name -->
-        <a class="navbar-brand" asp-controller="Home" asp-action="Index">Wise Wallet</a>
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index" href="/">Wise Wallet</a>
 
         <!-- Navbar Toggler -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -14,10 +14,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link text-orange" asp-controller="Transaction" asp-action="Index">Transaction</a>
+                    <a class="nav-link text-orange" asp-controller="Transaction" asp-action="Index" href="/transaction">Transaction</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-orange" asp-controller="Debt" asp-action="ViewDebt">View Debt</a>
+                    <a class="nav-link text-orange" asp-controller="Debt" asp-action="ViewDebt" href="/debt">View Debt</a>
                 </li>
             </ul>
 

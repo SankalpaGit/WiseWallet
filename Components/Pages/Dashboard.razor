@@ -1,5 +1,130 @@
-﻿@page "/dashboard"
+﻿@page "/"
 
 @using WiseWallet.Components.Layout 
 
 <NavBar />
+
+<div class="container py-4">
+    <!-- Cards Section -->
+    <div class="row text-center mb-4 justify-content-center">
+        <div class="col-lg-2 col-md-3 col-sm-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Total Cash Inflows</h6>
+                    <h3 class="card-text text-warning">$ 58420</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Total Cash Outflows</h6>
+                    <h3 class="card-text text-warning">$ 58420</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Total Debts</h6>
+                    <h3 class="card-text text-warning">$ 58428</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Cleared Debts</h6>
+                    <h3 class="card-text text-warning">$ 25620</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Remain Debts</h6>
+                    <h3 class="card-text text-warning">$ 32838</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Transaction Section -->
+    <div class="row">
+        <!-- Transaction Highlight -->
+        <div class="col-md-7">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-white">
+                    Transaction Highlight
+                    <span class="float-end">
+                        <select class="form-select form-select-sm d-inline w-auto">
+                            <option>Highest</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-warning">
+                            <tr>
+                                <th>S.No</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Tags</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>2024-12-20</td>
+                                <td>Income</td>
+                                <td>Salary</td>
+                                <td>$3000</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>2024-12-18</td>
+                                <td>Expense</td>
+                                <td>Groceries</td>
+                                <td>$500</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unpaid Debt -->
+        <div class="col-md-5">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-white">
+                    Unpaid Debt
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-warning">
+                            <tr>
+                                <th>S.No</th>
+                                <th>Due</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>2024-12-25</td>
+                                <td>$2000</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>2024-12-30</td>
+                                <td>$1500</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
