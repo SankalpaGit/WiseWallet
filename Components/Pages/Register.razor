@@ -1,23 +1,24 @@
 @page "/register"
+@using WiseWallet.Services
+@inject NavigationManager NavigationManager
 
 <section class="vh-100" style="background-color: #f7f7f7;">
     <div class="container-fluid d-flex align-items-center justify-content-center vh-100">
         <div class="row login-card p-4 align-items-center w-100 gap-4" style="max-width: 900px; min-height: 500px;">
-            <!-- Left Side Form (on smaller screens, this will be on top, and on larger screens, it will be on the left) -->
             <div class="col-12 col-md-5 d-flex flex-column justify-content-center">
                 <h3 class="text-center mb-4 fw-bold">Register</h3>
-                <form method="post" class="d-flex flex-column justify-content-center h-100">
+                <form @onsubmit="HandleRegister" class="d-flex flex-column justify-content-center h-100">
                     <div class="mb-4">
-                        <input type="email" class="form-control" placeholder="Your G-Mail Address" required />
+                        <input type="email" class="form-control" placeholder="Your G-Mail Address" @bind="Gmail" required />
                     </div>
                     <div class="mb-4">
-                        <input type="password" class="form-control" placeholder="Password" required />
+                        <input type="password" class="form-control" placeholder="Password" @bind="Password" required />
                     </div>
                     <div class="mb-4">
-                        <input type="password" class="form-control" placeholder="Confirm Password" required />
+                        <input type="password" class="form-control" placeholder="Confirm Password" @bind="ConfirmPassword" required />
                     </div>
                     <div class="mb-4">
-                        <select class="form-select" required>
+                        <select class="form-select" @bind="CurrencyType" required>
                             <option value="" disabled selected>Select Your Currency</option>
                             <option value="NRS">Nepal (NRS) - &#8363;</option>
                             <option value="INR">India (INR) - &#8377;</option>
@@ -39,3 +40,21 @@
         </div>
     </div>
 </section>
+
+@code {
+    private string Gmail = string.Empty;
+    private string Password = string.Empty;
+    private string ConfirmPassword = string.Empty;
+    private string CurrencyType = string.Empty;
+
+    private void HandleRegister()
+    {
+        bool isRegistered = RegisterServices.RegisterUser(Gmail, Password, ConfirmPassword, CurrencyType);
+
+        if (isRegistered)
+        {
+            // Navigate to another page after successful registration
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

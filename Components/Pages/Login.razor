@@ -1,4 +1,6 @@
-﻿@page "/login"
+﻿@page "/"
+@using WiseWallet.Services
+@inject NavigationManager NavigationManager
 
 <div class="container-fluid login-container d-flex align-items-center justify-content-center vh-100">
     <div class="row login-card p-4 align-items-center w-100" style="max-width: 900px;">
@@ -10,18 +12,16 @@
         <!-- Right Side Login Form -->
         <div class="col-md-6">
             <h3 class="text-center mb-4">Log In</h3>
-            <form method="post">
+            <form @onsubmit="HandleLogin" class="d-flex flex-column">
                 <div class="mb-3">
-                    <input type="email" class="form-control" placeholder="Your G-Mail Address" required />
+                    <input type="email" class="form-control" placeholder="Your G-Mail Address" @bind="Gmail" required />
                 </div>
                 <div class="mb-3">
-                    <input type="password" class="form-control" placeholder="Password" required />
+                    <input type="password" class="form-control" placeholder="Password" @bind="Password" required />
                 </div>
-                <!-- Button without anchor tag wrapping -->
                 <button type="submit" class="btn login-btn w-100 py-2 rounded" style="background-color: #FFD700; color: #000;">
                     Log In
                 </button>
-                <!-- Anchor tag for Sign Up link -->
                 <p class="text-center mt-3">
                     Haven't created an account? <a href="/register" class="text-decoration-none">Sign Up</a>
                 </p>
@@ -29,3 +29,23 @@
         </div>
     </div>
 </div>
+
+@code {
+    private string Gmail = string.Empty;
+    private string Password = string.Empty;
+
+    private void HandleLogin()
+    {
+        bool isAuthenticated = LoginServices.AuthenticateUser(Gmail, Password);
+
+        if (isAuthenticated)
+        {
+            // Navigate to the dashboard after successful login
+            NavigationManager.NavigateTo("/dashboard");
+        }
+        else
+        {
+            Console.WriteLine("Login failed!");
+        }
+    }
+}
