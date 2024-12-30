@@ -109,25 +109,37 @@
 
 @code {
     private DebtModel NewDebt = new();
-    private int CurrentUserId = 0; // Use manual ID for now
 
     private void SubmitDebtForm()
     {
-        // Ensure the default status is set to "Unpaid"
-        NewDebt.Status = "Unpaid";
+        // Retrieve the logged-in user
+        var loggedInUser = LoginServices.GetLoggedInUser();
 
-        bool success = DebtServices.AddDebt(CurrentUserId, NewDebt);
-        if (success)
+        if (loggedInUser != null)
         {
-            Console.WriteLine("Debt added successfully!");
-            // Optionally clear the form or notify the user
-            NewDebt = new DebtModel();
+            int currentUserId = loggedInUser.UserId;
+
+            // Ensure the default status is set to "Unpaid"
+            NewDebt.Status = "Unpaid";
+
+            bool success = DebtServices.AddDebt(currentUserId, NewDebt);
+            if (success)
+            {
+                Console.WriteLine("Debt added successfully!");
+                // Optionally clear the form or notify the user
+                NewDebt = new DebtModel();
+            }
+            else
+            {
+                Console.WriteLine("Failed to add debt.");
+            }
         }
         else
         {
-            Console.WriteLine("Failed to add debt.");
+            Console.WriteLine("No user is logged in. Cannot add debt.");
         }
     }
 }
+
 
 

@@ -12,6 +12,9 @@ namespace WiseWallet.Services
     {
         private static readonly string FilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "WiseWallet", "DataStore.json");
 
+        // Track the currently logged-in user
+        private static UserModel? LoggedInUser = null;
+
         // Method to authenticate user
         public static bool AuthenticateUser(string gmail, string password)
         {
@@ -22,7 +25,7 @@ namespace WiseWallet.Services
             string json = File.ReadAllText(FilePath);
             var users = JsonSerializer.Deserialize<List<UserModel>>(json) ?? new List<UserModel>();
 
-            // Check if user exists
+            // Find the user by Gmail
             var user = users.FirstOrDefault(u => u.Gmail == gmail);
 
             if (user == null)
@@ -35,11 +38,27 @@ namespace WiseWallet.Services
             if (HashPassword.Verify(password, user.Password))
             {
                 Console.WriteLine("Login successful!");
+
+                // Set the logged-in user
+                LoggedInUser = user;
                 return true;
             }
 
             Console.WriteLine("Incorrect password!");
             return false;
+        }
+
+        // Method to get the logged-in user
+        public static UserModel? GetLoggedInUser()
+        {
+            return LoggedInUser;
+        }
+
+        // Method to log out the current user
+        public static void Logout()
+        {
+            LoggedInUser = null;
+            Console.WriteLine("User logged out successfully!");
         }
     }
 }
