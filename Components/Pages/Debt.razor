@@ -1,6 +1,8 @@
 ﻿@page "/debt"
 
 @using WiseWallet.Components.Layout
+@using WiseWallet.Models
+@using WiseWallet.Services
 
 <NavBar />
 
@@ -15,30 +17,31 @@
                     <form>
                         <div class="mb-3">
                             <label for="date-taken" class="form-label">Date Taken</label>
-                            <input type="date" class="form-control" id="date-taken">
+                            <input type="date" class="form-control" id="date-taken" @bind="NewDebt.DateTaken">
                         </div>
                         <div class="mb-3">
                             <label for="due-date" class="form-label">Due Date</label>
-                            <input type="date" class="form-control" id="due-date">
+                            <input type="date" class="form-control" id="due-date" @bind="NewDebt.DueDate">
                         </div>
                         <div class="mb-3">
                             <label for="source" class="form-label">Source</label>
-                            <input type="text" class="form-control" id="source" placeholder="Enter source">
+                            <input type="text" class="form-control" id="source" @bind="NewDebt.Source">
                         </div>
                         <div class="mb-3">
                             <label for="tags" class="form-label">Tags</label>
-                            <input type="text" class="form-control" id="tags" placeholder="Enter tags">
+                            <input type="text" class="form-control" id="tags" @bind="NewDebt.Tags">
                         </div>
                         <div class="mb-3">
                             <label for="amount" class="form-label">Amount</label>
-                            <input type="number" class="form-control" id="amount" placeholder="Enter amount">
+                            <input type="number" class="form-control" id="amount" @bind="NewDebt.Amount">
                         </div>
                         <div class="mb-3">
                             <label for="note" class="form-label">Add the Note</label>
-                            <textarea class="form-control" id="note" rows="2" placeholder="Enter note"></textarea>
+                            <textarea class="form-control" id="note" rows="2" @bind="NewDebt.Note"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-warning w-100">Add Cash</button>
-                    </form>
+                        <button type="button" class="btn btn-warning w-100" @onclick="SubmitDebtForm">Add Debt</button>
+                </form>
+
                 </div>
             </div>
         </div>
@@ -62,6 +65,7 @@
                                 <th>S.No</th>
                                 <th>Taken</th>
                                 <th>Due</th>
+                                <th>Source</th>
                                 <th>Tags</th>
                                 <th>Amount</th>
                                 <th>Status</th>
@@ -73,24 +77,25 @@
                                 <td>1</td>
                                 <td>2024-12-01</td>
                                 <td>2024-12-31</td>
+                                <td>Sankalpa Shresth</td>
                                 <td>Loan</td>
                                 <td>15000</td>
                                 <td>Unpaid</td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary">Edit</button>
-                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                    <button class="btn btn-sm btn-danger">Clear Debt</button>
                                 </td>
                             </tr>
                             <tr>
                                 <td>2</td>
                                 <td>2024-11-15</td>
                                 <td>2024-12-15</td>
+                                <td>Rajesh Shresth</td>
                                 <td>Credit Card</td>
                                 <td>8000</td>
                                 <td>Paid</td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary">Edit</button>
-                                    <button class="btn btn-sm btn-danger">Delete</button>
+
+                                    <button class="btn btn-sm btn-danger">Clear Debt</button>
                                 </td>
                             </tr>
                             <!-- Add more rows here -->
@@ -101,4 +106,28 @@
         </div>
     </div>
 </div>
+
+@code {
+    private DebtModel NewDebt = new();
+    private int CurrentUserId = 0; // Use manual ID for now
+
+    private void SubmitDebtForm()
+    {
+        // Ensure the default status is set to "Unpaid"
+        NewDebt.Status = "Unpaid";
+
+        bool success = DebtServices.AddDebt(CurrentUserId, NewDebt);
+        if (success)
+        {
+            Console.WriteLine("Debt added successfully!");
+            // Optionally clear the form or notify the user
+            NewDebt = new DebtModel();
+        }
+        else
+        {
+            Console.WriteLine("Failed to add debt.");
+        }
+    }
+}
+
 

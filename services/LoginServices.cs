@@ -10,7 +10,7 @@ namespace WiseWallet.Services
 {
     internal class LoginServices
     {
-        private static readonly string FilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "WiseWallet", "UserModel.json");
+        private static readonly string FilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "WiseWallet", "DataStore.json");
 
         // Method to authenticate user
         public static bool AuthenticateUser(string gmail, string password)
