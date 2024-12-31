@@ -66,5 +66,43 @@ namespace WiseWallet.Services
             }
         }
 
+        public static void UpdateDebt(int userId, DebtModel updatedDebt)
+        {
+            FileCreation.EnsureFileExists();
+
+            // Read JSON data
+            string json = File.ReadAllText(FilePath);
+            var users = JsonSerializer.Deserialize<List<UserModel>>(json) ?? new List<UserModel>();
+
+            // Find the user
+            var user = users.FirstOrDefault(u => u.UserId == userId);
+            if (user != null)
+            {
+                // Update the debt
+                var debt = user.Debts?.FirstOrDefault(d => d.DebtId == updatedDebt.DebtId);
+                if (debt != null)
+                {
+                    debt.Status = updatedDebt.Status;
+                }
+
+                // Save updated data
+                string updatedJson = JsonSerializer.Serialize(users, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(FilePath, updatedJson);
+            }
+        }
+
+        public static List<DebtModel> GetUserDebts(int userId)
+        {
+            FileCreation.EnsureFileExists();
+
+            // Read JSON data
+            string json = File.ReadAllText(FilePath);
+            var users = JsonSerializer.Deserialize<List<UserModel>>(json) ?? new List<UserModel>();
+
+            // Find the user and return their debts
+            var user = users.FirstOrDefault(u => u.UserId == userId);
+            return user?.Debts ?? new List<DebtModel>();
+        }
+
     }
 }

@@ -49,11 +49,13 @@
         <!-- Details Table Section -->
         <div class="col-md-8">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5>Total: Rs 23000</h5>
+                <h5>Total: Rs @TotalAmount</h5>
                 <div class="filter">
                     <label for="filter" class="me-2">Filter</label>
-                    <select class="form-select form-select-sm d-inline w-auto" id="filter">
-                        <option>Months</option>
+                    <select class="form-select form-select-sm d-inline w-auto" id="filter" @onchange="FilterDebts">
+                        <option value="all">All</option>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="paid">Paid</option>
                     </select>
                 </div>
             </div>
@@ -73,37 +75,39 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>2024-12-01</td>
-                                <td>2024-12-31</td>
-                                <td>Sankalpa Shresth</td>
-                                <td>Loan</td>
-                                <td>15000</td>
-                                <td>Unpaid</td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger">Clear Debt</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>2024-11-15</td>
-                                <td>2024-12-15</td>
-                                <td>Rajesh Shresth</td>
-                                <td>Credit Card</td>
-                                <td>8000</td>
-                                <td>Paid</td>
-                                <td>
-
-                                    <button class="btn btn-sm btn-danger">Clear Debt</button>
-                                </td>
-                            </tr>
-                            <!-- Add more rows here -->
+                            @if (FilteredDebts == null || !FilteredDebts.Any())
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center">No debts found.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var debt in FilteredDebts)
+                                {
+                                    <tr>
+                                        <td>@DebtIndex++</td>
+                                        <td>@debt.DateTaken.ToShortDateString()</td>
+                                        <td>@debt.DueDate.ToShortDateString()</td>
+                                        <td>@debt.Source</td>
+                                        <td>@debt.Tags</td>
+                                        <td>Rs @debt.Amount</td>
+                                        <td>@debt.Status</td>
+                                        <td>
+                                            @if (debt.Status == "Unpaid")
+                                            {
+                                                <button class="btn btn-sm btn-danger" @onclick="() => MarkDebtAsPaid(debt)">Clear Debt</button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -141,5 +145,55 @@
     }
 }
 
+@code {
+    private List<DebtModel> Debts = new();
+    private List<DebtModel> FilteredDebts = new();
+    private int DebtIndex = 1; // For serial numbers
+    private int CurrentUserId = 1; // Replace with logic to get the logged-in user's ID
+    private decimal TotalAmount;
 
+    protected override void OnInitialized()
+    {
+        // Fetch debts and calculate total
+        Debts = DebtServices.GetUserDebts(CurrentUserId);
+        FilteredDebts = Debts; // Default to show all
+        CalculateTotalAmount();
+    }
 
+    private void FilterDebts(ChangeEventArgs e)
+    {
+        var filter = e.Value.ToString();
+        if (filter == "paid")
+        {
+            FilteredDebts = Debts.Where(d => d.Status == "Paid").ToList();
+        }
+        else if (filter == "unpaid")
+        {
+            FilteredDebts = Debts.Where(d => d.Status == "Unpaid").ToList();
+        }
+        else
+        {
+            FilteredDebts = Debts; // Show all
+        }
+
+        DebtIndex = 1; // Reset serial numbers
+        CalculateTotalAmount();
+    }
+
+    private void MarkDebtAsPaid(DebtModel debt)
+    {
+        // Mark the debt as paid
+        debt.Status = "Paid";
+
+        // Save the updated data back to JSON
+        DebtServices.UpdateDebt(CurrentUserId, debt);
+
+        // Refresh filtered debts and totals
+        FilterDebts(new ChangeEventArgs { Value = "all" });
+    }
+
+    private void CalculateTotalAmount()
+    {
+        TotalAmount = FilteredDebts.Sum(d => d.Amount);
+    }
+}
