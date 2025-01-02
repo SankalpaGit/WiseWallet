@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using WiseWallet.Models;
+using WiseWallet.Utils;
 
 namespace WiseWallet.Services
 {
@@ -48,13 +49,13 @@ namespace WiseWallet.Services
             {
                 if (type == "Income")
                 {
-                    transaction.TransactionId = user.Income?.Count + 1 ?? 1;
+                    transaction.TransactionId = (user.Income?.Count ?? 0) + 1;
                     user.Income ??= new List<TransactionModel>();
                     user.Income.Add(transaction);
                 }
                 else if (type == "Expenses")
                 {
-                    transaction.TransactionId = user.Expenses?.Count + 1 ?? 1;
+                    transaction.TransactionId = (user.Expenses?.Count ?? 0) + 1;
                     user.Expenses ??= new List<TransactionModel>();
                     user.Expenses.Add(transaction);
                 }
@@ -65,6 +66,41 @@ namespace WiseWallet.Services
             }
 
             return false;
+        }
+
+        public static List<TransactionModel> GetUserTransactions(int userId, string type = "all")
+        {
+            EnsureFileExists();
+            string json = File.ReadAllText(FilePath);
+            var users = JsonSerializer.Deserialize<List<UserModel>>(json) ?? new List<UserModel>();
+
+            var user = users.FirstOrDefault(u => u.UserId == userId);
+            if (user != null)
+            {
+                if (type == "Income")
+                {
+                    return user.Income ?? new List<TransactionModel>();
+                }
+                else if (type == "Expenses")
+                {
+                    return user.Expenses ?? new List<TransactionModel>();
+                }
+                else
+                {
+                    var allTransactions = new List<TransactionModel>();
+                    if (user.Income != null)
+                    {
+                        allTransactions.AddRange(user.Income);
+                    }
+                    if (user.Expenses != null)
+                    {
+                        allTransactions.AddRange(user.Expenses);
+                    }
+                    return allTransactions;
+                }
+            }
+
+            return new List<TransactionModel>();
         }
     }
 }

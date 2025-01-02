@@ -40,8 +40,7 @@
                             <textarea class="form-control" id="note" rows="2" @bind="NewDebt.Note"></textarea>
                         </div>
                         <button type="button" class="btn btn-warning w-100" @onclick="SubmitDebtForm">Add Debt</button>
-                </form>
-
+                    </form>
                 </div>
             </div>
         </div>
@@ -107,31 +106,31 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
 @code {
     private DebtModel NewDebt = new();
+    private List<DebtModel> Debts = new();
+    private List<DebtModel> FilteredDebts = new();
+    private int DebtIndex = 1; // For serial numbers
+    private int CurrentUserId;
+    private decimal TotalAmount;
 
     private void SubmitDebtForm()
     {
-        // Retrieve the logged-in user
         var loggedInUser = LoginServices.GetLoggedInUser();
 
         if (loggedInUser != null)
         {
-            int currentUserId = loggedInUser.UserId;
-
-            // Ensure the default status is set to "Unpaid"
+            CurrentUserId = loggedInUser.UserId;
             NewDebt.Status = "Unpaid";
 
-            bool success = DebtServices.AddDebt(currentUserId, NewDebt);
-            if (success)
+            if (DebtServices.AddDebt(CurrentUserId, NewDebt))
             {
                 Console.WriteLine("Debt added successfully!");
-                // Optionally clear the form or notify the user
-                NewDebt = new DebtModel();
+                NewDebt = new DebtModel(); // Clear the form
+                RefreshDebts();
             }
             else
             {
@@ -143,38 +142,37 @@
             Console.WriteLine("No user is logged in. Cannot add debt.");
         }
     }
-}
-
-@code {
-    private List<DebtModel> Debts = new();
-    private List<DebtModel> FilteredDebts = new();
-    private int DebtIndex = 1; // For serial numbers
-    private int CurrentUserId = 1; // Replace with logic to get the logged-in user's ID
-    private decimal TotalAmount;
 
     protected override void OnInitialized()
     {
-        // Fetch debts and calculate total
+        var loggedInUser = LoginServices.GetLoggedInUser();
+        if (loggedInUser != null)
+        {
+            CurrentUserId = loggedInUser.UserId;
+            RefreshDebts();
+        }
+        else
+        {
+            Console.WriteLine("No user is logged in. Cannot fetch debts.");
+        }
+    }
+
+    private void RefreshDebts()
+    {
         Debts = DebtServices.GetUserDebts(CurrentUserId);
-        FilteredDebts = Debts; // Default to show all
+        FilteredDebts = Debts;
         CalculateTotalAmount();
     }
 
     private void FilterDebts(ChangeEventArgs e)
     {
         var filter = e.Value.ToString();
-        if (filter == "paid")
+        FilteredDebts = filter switch
         {
-            FilteredDebts = Debts.Where(d => d.Status == "Paid").ToList();
-        }
-        else if (filter == "unpaid")
-        {
-            FilteredDebts = Debts.Where(d => d.Status == "Unpaid").ToList();
-        }
-        else
-        {
-            FilteredDebts = Debts; // Show all
-        }
+            "paid" => Debts.Where(d => d.Status == "Paid").ToList(),
+            "unpaid" => Debts.Where(d => d.Status == "Unpaid").ToList(),
+            _ => Debts
+        };
 
         DebtIndex = 1; // Reset serial numbers
         CalculateTotalAmount();
@@ -182,14 +180,9 @@
 
     private void MarkDebtAsPaid(DebtModel debt)
     {
-        // Mark the debt as paid
         debt.Status = "Paid";
-
-        // Save the updated data back to JSON
         DebtServices.UpdateDebt(CurrentUserId, debt);
-
-        // Refresh filtered debts and totals
-        FilterDebts(new ChangeEventArgs { Value = "all" });
+        RefreshDebts();
     }
 
     private void CalculateTotalAmount()
