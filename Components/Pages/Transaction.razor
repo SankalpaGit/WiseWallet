@@ -9,12 +9,19 @@
 <div class="container py-4">
     <div class="row">
         <!-- Form Section -->
-        <div class="col-md-4">
+        <div class="col-md-4 mb-4">
             <div class="card border-warning">
                 <div class="card-body">
                     <h5 class="card-title">Add the Transaction</h5>
                     <p class="card-text text-muted">Now it's easy to track your transaction</p>
                     <form>
+                        @if (!string.IsNullOrEmpty(ValidationError))
+                        {
+                            <div class="alert alert-danger">
+                                @ValidationError
+                            </div>
+                        }
+
                         <div class="mb-3">
                             <label for="date" class="form-label">Date</label>
                             <input type="date" class="form-control" id="date" @bind="NewTransaction.Date">
@@ -29,7 +36,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="tags" class="form-label">Tags</label>
-                            <input type="text" class="form-control" id="tags" placeholder="Enter tags" @bind="NewTransaction.Tags">
+                            <input type="text" class="form-control" id="tags" placeholder="Enter tags" @bind="NewTransaction.Tags" required>
                         </div>
                         <div class="mb-3">
                             <label for="amount" class="form-label">Amount</label>
@@ -39,19 +46,23 @@
                             <label for="note" class="form-label">Add the note</label>
                             <textarea class="form-control" id="note" rows="2" placeholder="Enter note" @bind="NewTransaction.Note"></textarea>
                         </div>
-                        <button type="button" class="btn btn-warning w-100" @onclick="SubmitTransactionForm">Add Cash</button>
+                        <button type="button" class="btn btn-warning w-100" @onclick="SubmitTransactionForm">
+                            Add Cash
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
 
         <!-- Table Section -->
-        <div class="col-md-8">
+        <div class="col-md-8 mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5>Total Income: Rs @TotalIncome</h5>
                 <h5>Total Expenses: Rs @TotalExpenses</h5>
-                <div class="filter">
-                    <label for="filter" class="me-2">Filter</label>
+                <div class="d-flex align-items-center">
+                    <input type="text" class="form-control me-2" placeholder="Search by Tags Title"
+                           @oninput="(e) => SearchTransaction(e.Value.ToString())" style="max-width: 200px;">
+                    <label for="filter" class="me-2 mb-0">Filter</label>
                     <select class="form-select form-select-sm d-inline w-auto" id="filter" @onchange="FilterTransactions">
                         <option value="all">All</option>
                         <option value="income">Income</option>
@@ -101,6 +112,7 @@
     </div>
 </div>
 
+
 @code {
     private TransactionModel NewTransaction = new();
     private string SelectedType = string.Empty;
@@ -130,12 +142,21 @@
         CalculateTotals();
     }
 
+    private string ValidationError = string.Empty; // To store validation error messages.
+
     private void SubmitTransactionForm()
     {
+        ValidationError = string.Empty; // Clear previous error messages.
         var loggedInUser = LoginServices.GetLoggedInUser();
 
         if (loggedInUser != null && !string.IsNullOrEmpty(SelectedType))
         {
+            if (SelectedType == "expense" && NewTransaction.Amount > TotalIncome)
+            {
+                ValidationError = "Expense cannot exceed total income.";
+                return;
+            }
+
             NewTransaction.Type = SelectedType; // Set the type of the transaction
             bool success = false;
 
@@ -157,14 +178,38 @@
             }
             else
             {
-                Console.WriteLine("Failed to add transaction.");
+                ValidationError = "Failed to add transaction. Please try again.";
             }
         }
         else
         {
-            Console.WriteLine("Invalid user or transaction type.");
+            ValidationError = "Invalid user or transaction type.";
         }
     }
+    private void SearchTransaction(string query)
+    {
+        // Reset the filtered transactions list based on the search query
+        FilteredTransactions = new List<TransactionModel>();
+
+        foreach (var transaction in Transactions)
+        {
+            if (!string.IsNullOrWhiteSpace(query) && transaction.Tags.Contains(query, StringComparison.OrdinalIgnoreCase))
+            {
+                FilteredTransactions.Add(transaction);
+            }
+        }
+
+        // If the query is empty, show all transactions
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            FilteredTransactions = new List<TransactionModel>(Transactions);
+        }
+
+        // Reset the index
+        TransactionIndex = 1;
+        StateHasChanged(); // Trigger UI refresh
+    }
+
 
     private void FilterTransactions(ChangeEventArgs e)
     {
