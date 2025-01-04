@@ -9,7 +9,7 @@
 <div class="container py-4">
     <div class="row">
         <!-- Form Section -->
-        <div class="col-md-4">
+        <div class="col-md-4 mb-4">
             <div class="card border-warning">
                 <div class="card-body">
                     <h5 class="card-title">Record Your Debt</h5>
@@ -46,11 +46,13 @@
         </div>
 
         <!-- Details Table Section -->
-        <div class="col-md-8">
+        <div class="col-md-8 mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5>Total: Rs @TotalAmount</h5>
-                <div class="filter">
-                    <label for="filter" class="me-2">Filter</label>
+                <div class="d-flex align-items-center">
+                    <input type="text" class="form-control me-2" placeholder="Search by Source"
+                           @oninput="(e) => SearchDebt(e.Value.ToString())" style="max-width: 200px;">
+                    <label for="filter" class="me-2 mb-0">Filter</label>
                     <select class="form-select form-select-sm d-inline w-auto" id="filter" @onchange="FilterDebts">
                         <option value="all">All</option>
                         <option value="unpaid">Unpaid</option>
@@ -89,7 +91,7 @@
                                         <td>@debt.DateTaken.ToShortDateString()</td>
                                         <td>@debt.DueDate.ToShortDateString()</td>
                                         <td>@debt.Source</td>
-                                        <td>@debt.Tags</td>
+                                        <td class="bg-warning bg-gradient">@debt.Tags</td>
                                         <td>Rs @debt.Amount</td>
                                         <td>@debt.Status</td>
                                         <td>
@@ -108,6 +110,8 @@
         </div>
     </div>
 </div>
+
+
 
 @code {
     private DebtModel NewDebt = new();
@@ -178,15 +182,42 @@
         CalculateTotalAmount();
     }
 
+    private void SearchDebt(string query)
+    {
+        // Reset the filtered debts list based on the search query
+        FilteredDebts = new List<DebtModel>();
+
+        foreach (var debt in Debts)
+        {
+            if (!string.IsNullOrWhiteSpace(query) && debt.Source.Contains(query, StringComparison.OrdinalIgnoreCase))
+            {
+                FilteredDebts.Add(debt);
+            }
+        }
+
+        // If the query is empty, show all debts
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            FilteredDebts = new List<DebtModel>(Debts);
+        }
+
+        // Reset the index and recalculate the total amount
+        DebtIndex = 1;
+        CalculateTotalAmount();
+        StateHasChanged(); // Trigger UI refresh
+    }
+
+
     private void MarkDebtAsPaid(DebtModel debt)
     {
         debt.Status = "Paid";
         DebtServices.UpdateDebt(CurrentUserId, debt);
         RefreshDebts();
+        CalculateTotalAmount();
     }
 
     private void CalculateTotalAmount()
     {
-        TotalAmount = FilteredDebts.Sum(d => d.Amount);
+        TotalAmount = FilteredDebts.Where(d => d.Status == "Unpaid").Sum(d => d.Amount);
     }
 }
