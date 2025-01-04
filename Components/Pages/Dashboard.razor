@@ -1,17 +1,20 @@
 ﻿@page "/dashboard"
 
 @using WiseWallet.Components.Layout 
+@using WiseWallet.Services
+@using WiseWallet.Models
 
 <NavBar />
 
 <div class="container py-4">
+
     <!-- Cards Section -->
     <div class="row text-center mb-4 justify-content-center">
         <div class="col-lg-2 col-md-3 col-sm-4">
             <div class="card border-warning">
                 <div class="card-body">
                     <h6 class="card-title text-muted">Total Cash Inflows</h6>
-                    <h3 class="card-text text-warning">$ 58420</h3>
+                    <h3 class="card-text text-warning">रु @TotalIncome</h3>
                 </div>
             </div>
         </div>
@@ -19,7 +22,7 @@
             <div class="card border-warning">
                 <div class="card-body">
                     <h6 class="card-title text-muted">Total Cash Outflows</h6>
-                    <h3 class="card-text text-warning">$ 58420</h3>
+                    <h3 class="card-text text-warning">रु @TotalExpenses</h3>
                 </div>
             </div>
         </div>
@@ -27,7 +30,7 @@
             <div class="card border-warning">
                 <div class="card-body">
                     <h6 class="card-title text-muted">Total Debts</h6>
-                    <h3 class="card-text text-warning">$ 58428</h3>
+                    <h3 class="card-text text-warning">रु @TotalDebt</h3>
                 </div>
             </div>
         </div>
@@ -35,7 +38,7 @@
             <div class="card border-warning">
                 <div class="card-body">
                     <h6 class="card-title text-muted">Cleared Debts</h6>
-                    <h3 class="card-text text-warning">$ 25620</h3>
+                    <h3 class="card-text text-warning">रु @TotalPaid</h3>
                 </div>
             </div>
         </div>
@@ -43,23 +46,24 @@
             <div class="card border-warning">
                 <div class="card-body">
                     <h6 class="card-title text-muted">Remain Debts</h6>
-                    <h3 class="card-text text-warning">$ 32838</h3>
+                    <h3 class="card-text text-warning">रु @RemainDebt</h3>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- Transaction Section -->
+    <!-- Transaction Section and Unpaid Debt Section (Side by side) -->
     <div class="row">
-        <!-- Transaction Highlight -->
-        <div class="col-md-7">
+        <!-- Transaction Highlight Section -->
+        <div class="col-md-6 mb-4">
             <div class="card border-warning">
                 <div class="card-header bg-warning text-white">
                     Transaction Highlight
                     <span class="float-end">
-                        <select class="form-select form-select-sm d-inline w-auto">
-                            <option>Highest</option>
+                        <select class="form-select form-select-sm d-inline w-auto" @onchange="(e) => SortTransactions(e.Value.ToString())">
+                            <option value="highest">Highest</option>
+                            <option value="lowest">Lowest</option>
+                            <option value="latest">Latest</option>
                         </select>
                     </span>
                 </div>
@@ -67,7 +71,6 @@
                     <table class="table table-bordered table-hover mb-0">
                         <thead class="table-warning">
                             <tr>
-                                <th>S.No</th>
                                 <th>Date</th>
                                 <th>Type</th>
                                 <th>Tags</th>
@@ -75,56 +78,183 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>2024-12-20</td>
-                                <td>Income</td>
-                                <td>Salary</td>
-                                <td>$3000</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>2024-12-18</td>
-                                <td>Expense</td>
-                                <td>Groceries</td>
-                                <td>$500</td>
-                            </tr>
+                            @if (SortedTransactions == null || !SortedTransactions.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center">No transactions found.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var transaction in SortedTransactions)
+                                {
+                                    <tr>
+                                        <td>@transaction.Date.ToShortDateString()</td>
+                                        <td>@transaction.Type</td>
+                                        <td>@transaction.Tags</td>
+                                        <td>Rs @transaction.Amount</td>
+                                    </tr>
+                                }
+                            }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Unpaid Debt -->
-        <div class="col-md-5">
+        <!-- Unpaid Debt Section -->
+        <div class="col-md-6 mb-4">
             <div class="card border-warning">
                 <div class="card-header bg-warning text-white">
                     Unpaid Debt
+                    <span class="float-end">
+                        <select class="form-select form-select-sm d-inline w-auto" @onchange="(e) => SortUnpaidDebts(e.Value.ToString())">
+                            <option value="highest">Highest</option>
+                            <option value="lowest">Lowest</option>
+                            <option value="latest">Latest</option>
+                        </select>
+                    </span>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-bordered table-hover mb-0">
                         <thead class="table-warning">
                             <tr>
-                                <th>S.No</th>
                                 <th>Due</th>
                                 <th>Amount</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>2024-12-25</td>
-                                <td>$2000</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>2024-12-30</td>
-                                <td>$1500</td>
-                            </tr>
+                            @if (SortedUnpaidDebts == null || !SortedUnpaidDebts.Any())
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center">No unpaid debts found.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var debt in SortedUnpaidDebts)
+                                {
+                                    <tr>
+                                        <td>@debt.DueDate.ToShortDateString()</td>
+                                        <td>Rs @debt.Amount</td>
+                                    </tr>
+                                }
+                            }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
+
+
+@code {
+    private decimal TotalIncome;
+    private decimal TotalExpenses;
+    private decimal TotalDebt;
+    private decimal TotalPaid;
+    private decimal RemainDebt;
+    private List<TransactionModel> Transactions = new();
+    private List<DebtModel> Debts = new();
+    private List<TransactionModel> SortedTransactions = new();
+    private List<DebtModel> SortedUnpaidDebts = new();
+    private int CurrentUserId;
+
+    private string SelectedSortOption = "latest"; // Default sorting option
+    private string SelectedDebtSortOption = "due_asc"; // Default debt sort option
+    private int DebtIndex = 1;
+
+    protected override void OnInitialized()
+    {
+        var loggedInUser = LoginServices.GetLoggedInUser();
+
+        if (loggedInUser != null)
+        {
+            CurrentUserId = loggedInUser.UserId;
+            RefreshDebts();
+            RefreshTransactions();
+        }
+        else
+        {
+            Console.WriteLine("No user is logged in. Cannot fetch data.");
+        }
+    }
+
+    private void RefreshTransactions()
+    {
+        Transactions = TransactionServices.GetUserTransactions(CurrentUserId);
+        SortTransactions(SelectedSortOption);
+        CalculateTotals();
+    }
+
+    private void RefreshDebts()
+    {
+        Debts = DebtServices.GetUserDebts(CurrentUserId);
+        SortedUnpaidDebts = Debts.Where(d => d.Status == "Unpaid").ToList();
+        SortUnpaidDebts(SelectedDebtSortOption); // Apply the sorting
+    }
+
+    private void SortTransactions(string sortOption)
+    {
+        SelectedSortOption = sortOption;
+        switch (sortOption)
+        {
+            case "highest":
+                SortedTransactions = Transactions.OrderByDescending(t => t.Amount).ToList();
+                break;
+            case "lowest":
+                SortedTransactions = Transactions.OrderBy(t => t.Amount).ToList();
+                break;
+            case "latest":
+                SortedTransactions = Transactions.OrderByDescending(t => t.Date).ToList();
+                break;
+            default:
+                SortedTransactions = Transactions;
+                break;
+        }
+        StateHasChanged(); // Trigger UI refresh
+    }
+
+    private void SortUnpaidDebts(string sortOption)
+    {
+        SelectedDebtSortOption = sortOption;
+        switch (sortOption)
+        {
+            case "highest":
+                SortedUnpaidDebts = SortedUnpaidDebts.OrderByDescending(d => d.Amount).ToList();
+                break;
+            case "lowest":
+                SortedUnpaidDebts = SortedUnpaidDebts.OrderBy(d => d.Amount).ToList();
+                break;
+            case "latest":
+                SortedUnpaidDebts = SortedUnpaidDebts.OrderByDescending(d => d.DueDate).ToList();
+                break;
+            default:
+                break;
+        }
+        DebtIndex = 1; // Reset the serial number index
+        StateHasChanged(); // Trigger UI refresh
+    }
+
+    private void CalculateTotals()
+    {
+        // Calculate TotalDebt as the sum of all debts (Paid + Unpaid)
+        TotalDebt = Debts.Sum(d => d.Amount);
+
+        // Separate calculations for TotalPaid and RemainDebt (Unpaid portion)
+        TotalPaid = Debts.Where(d => d.Status == "Paid").Sum(d => d.Amount);
+        RemainDebt = TotalDebt - TotalPaid;
+
+        // Ensure RemainDebt is not negative
+        if (RemainDebt < 0)
+        {
+            RemainDebt = 0;
+        }
+
+        // Calculate totals for income and expenses
+        TotalIncome = Transactions.Where(t => t.Type == "income").Sum(t => t.Amount) + RemainDebt;
+        TotalExpenses = Transactions.Where(t => t.Type == "expense").Sum(t => t.Amount);
+    }
+}
