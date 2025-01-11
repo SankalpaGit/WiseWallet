@@ -1,4 +1,6 @@
 @namespace WiseWallet.Components.Layout
+@using WiseWallet.Services
+@inject NavigationManager NavigationManager
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container-fluid">
@@ -23,7 +25,7 @@
 
             <!-- Right: Profile Circle -->
             <div class="d-flex">
-                <div class="profile-circle">
+                <div class="profile-circle" @onclick="OpenProfileModal">
                     <i class="bi bi-person-fill"></i>
                 </div>
             </div>
@@ -31,6 +33,36 @@
     </div>
 </nav>
 
+<!-- Profile Modal -->
+@if (IsProfileModalOpen)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Profile Options</h5>
+                    <button type="button" class="btn-close" @onclick="CloseProfileModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="currencySelect" class="form-label">Update Currency</label>
+                        <select class="form-select" id="currencySelect" @bind="SelectedCurrency">
+                            @foreach (var currency in AvailableCurrencies)
+                            {
+                                <option value="@currency.Code">@currency.Name (@currency.Symbol)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="UpdateCurrency">Save</button>
+                    <button type="button" class="btn btn-danger" @onclick="Logout">Logout</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseProfileModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 <style>
     /* Navbar bottom shadow */
     .navbar {
@@ -52,10 +84,50 @@
         align-items: center;
         justify-content: center;
         background-color: #f8f9fa; /* Light gray background */
+        cursor: pointer; /* Make it clear that it's clickable */
     }
 
-    .profile-circle i {
-        font-size: 1.5rem; /* Increase the icon size */
-        color: #6c757d; /* Gray color for the icon */
-    }
+        .profile-circle i {
+            font-size: 1.5rem; /* Increase the icon size */
+            color: #6c757d; /* Gray color for the icon */
+        }
 </style>
+
+@code {
+    private bool IsProfileModalOpen = false;
+    private string SelectedCurrency = string.Empty;
+    private List<(string Code, string Name, string Symbol)> AvailableCurrencies = new()
+    {
+        ("USD", "United States Dollar", "$"),
+        ("NPR", "Nepalese Rupee", "Rs"),
+        ("EUR", "Euro", "€")
+    };
+
+    private void OpenProfileModal()
+    {
+        IsProfileModalOpen = true;
+    }
+
+    private void CloseProfileModal()
+    {
+        IsProfileModalOpen = false;
+    }
+
+    // private void UpdateCurrency()
+    // {
+    //     if (!string.IsNullOrEmpty(SelectedCurrency))
+    //     {
+    //         Call a service to update the user's preferred currency
+    //         CurrencyServices.UpdateUserCurrency(SelectedCurrency);
+    //         Console.WriteLine($"Currency updated to: {SelectedCurrency}");
+    //     }
+    //     CloseProfileModal();
+    // }
+
+    private void Logout()
+    {
+        // Logic for user logout
+        LoginServices.Logout();
+        NavigationManager.NavigateTo("/");
+    }
+}
