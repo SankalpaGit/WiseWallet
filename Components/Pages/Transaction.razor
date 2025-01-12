@@ -26,18 +26,48 @@
                             <label for="date" class="form-label">Date</label>
                             <input type="date" class="form-control" id="date" @bind="NewTransaction.Date">
                         </div>
-                        <div class="mb-3">
-                            <label for="type" class="form-label">Type</label>
-                            <select class="form-select" id="type" @bind="SelectedType">
-                                <option value="">Select Type</option>
-                                <option value="income">Income</option>
-                                <option value="expense">Expense</option>
-                            </select>
-                        </div>
+                        <select class="form-select" id="type" @bind="SelectedType" @bind:after="UpdateAvailableTags">
+                            <option value="">Select Type</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+
+                        
                         <div class="mb-3">
                             <label for="tags" class="form-label">Tags</label>
-                            <input type="text" class="form-control" id="tags" placeholder="Enter tags" @bind="NewTransaction.Tags" required>
+                            <div class="input-group">
+                                <select class="form-select" id="tags" @onchange="HandleTagSelection">
+                                    @foreach (var tag in AvailableTags)
+                                    {
+                                        <option value="@tag">@tag</option>
+                                    }
+                                    <option value="add_custom_tag">+ Add Custom Tag</option>
+                                </select>
+
+                            </div>
                         </div>
+
+                        @if (IsCustomTagModalOpen)
+                        {
+                            <div class="modal show d-block" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Add Custom Tag</h5>
+                                            <button type="button" class="btn-close" @onclick="CloseCustomTagModal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="text" class="form-control" @bind="NewCustomTag" placeholder="Enter custom tag" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" @onclick="SaveCustomTag">Save</button>
+                                            <button type="button" class="btn btn-secondary" @onclick="CloseCustomTagModal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
                         <div class="mb-3">
                             <label for="amount" class="form-label">Amount</label>
                             <input type="number" class="form-control" id="amount" placeholder="Enter amount" @bind="NewTransaction.Amount">
@@ -75,7 +105,6 @@
                     <table class="table table-bordered table-hover mb-0">
                         <thead class="table-warning">
                             <tr>
-                                <th>S.No</th>
                                 <th>Date</th>
                                 <th>Type</th>
                                 <th>Tags</th>
@@ -95,7 +124,6 @@
                                 @foreach (var transaction in FilteredTransactions)
                                 {
                                     <tr>
-                                        <td>@TransactionIndex++</td>
                                         <td>@transaction.Date.ToShortDateString()</td>
                                         <td>@transaction.Type</td>
                                         <td>@transaction.Tags</td>
@@ -121,6 +149,12 @@
     private int TransactionIndex = 1; // For serial numbers
     private decimal TotalIncome;
     private decimal TotalExpenses;
+    private List<string> IncomeTags = new List<string> { "Salary", "Bonus", "Investments" };
+    private List<string> ExpenseTags = new List<string> { "Groceries", "Food", "Rent" };
+    private List<string> AvailableTags = new List<string>();
+    private string SelectedTag = string.Empty;
+    private bool IsCustomTagModalOpen = false;
+    private string NewCustomTag = string.Empty;
 
     protected override void OnInitialized()
     {
@@ -133,6 +167,62 @@
         {
             Console.WriteLine("No user is logged in. Cannot fetch transactions.");
         }
+    }
+
+    protected override void OnParametersSet()
+    {
+        UpdateAvailableTags();
+    }
+
+    private void UpdateAvailableTags()
+    {
+        if (SelectedType == "income")
+        {
+            AvailableTags = new List<string>(IncomeTags);
+        }
+        else if (SelectedType == "expense")
+        {
+            AvailableTags = new List<string>(ExpenseTags);
+        }
+        else
+        {
+            AvailableTags = new List<string>();
+        }
+    }
+
+    private void HandleTypeChange(ChangeEventArgs e)
+    {
+        SelectedType = e.Value?.ToString() ?? string.Empty;
+        UpdateAvailableTags();
+    }
+
+    private void HandleTagSelection(ChangeEventArgs e)
+    {
+        if (e.Value?.ToString() == "add_custom_tag")
+        {
+            OpenCustomTagModal();
+        }
+    }
+    private void OpenCustomTagModal()
+    {
+        IsCustomTagModalOpen = true;
+    }
+
+
+    private void CloseCustomTagModal()
+    {
+        IsCustomTagModalOpen = false;
+        NewCustomTag = string.Empty;
+    }
+
+    private void SaveCustomTag()
+    {
+        if (!string.IsNullOrWhiteSpace(NewCustomTag) && !AvailableTags.Contains(NewCustomTag))
+        {
+            AvailableTags.Add(NewCustomTag);
+            SelectedTag = NewCustomTag; // Automatically select the new custom tag
+        }
+        CloseCustomTagModal();
     }
 
     private void RefreshTransactions(int userId)
