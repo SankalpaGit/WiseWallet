@@ -13,4 +13,8 @@
     {
         Status = "Unpaid"; // Default value
     }
+    public void ConvertAmount(decimal exchangeRate)
+    {
+        Amount = Math.Round(Amount * exchangeRate, 2); // Convert and round to 2 decimal places
+    }
 }

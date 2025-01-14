@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace WiseWallet.Models
+﻿namespace WiseWallet.Models
 {
     internal class UserModel
     {
@@ -9,7 +7,7 @@ namespace WiseWallet.Models
         public string? Password { get; set; }
         public string? CurrencyType { get; set; }
         public List<DebtModel>? Debts { get; set; } // Nested list of debts
-        public List<TransactionModel>? Income { get; set; } 
+        public List<TransactionModel>? Income { get; set; }
         public List<TransactionModel>? Expenses { get; set; }
 
         public UserModel()

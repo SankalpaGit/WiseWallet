@@ -124,6 +124,27 @@
             var userToUpdate = users.FirstOrDefault(u => u.UserId == CurrentUserId);
             if (userToUpdate != null)
             {
+                // Calculate the exchange rate (hardcoded for simplicity; replace with real logic)
+                decimal exchangeRate = GetExchangeRate(userToUpdate.CurrencyType, newCurrency);
+
+                // Update transaction amounts in Income and Expenses lists
+                foreach (var transaction in userToUpdate.Income)
+                {
+                    transaction.ConvertAmount(exchangeRate);
+                }
+
+                foreach (var transaction in userToUpdate.Expenses)
+                {
+                    transaction.ConvertAmount(exchangeRate);
+                }
+
+                // Update debt amounts
+                foreach (var debt in userToUpdate.Debts)
+                {
+                    debt.ConvertAmount(exchangeRate);
+                }
+
+                // Update the currency type
                 userToUpdate.CurrencyType = newCurrency;
 
                 // Serialize the updated list back to JSON
@@ -135,4 +156,13 @@
             }
         }
     }
+
+    // Example method to get exchange rate
+    private decimal GetExchangeRate(string fromCurrency, string toCurrency)
+    {
+        if (fromCurrency == "NRS" && toCurrency == "INR") return 0.62m; // Example: 1 NRS = 0.62 INR
+        if (fromCurrency == "INR" && toCurrency == "NRS") return 1.61m; // Example: 1 INR = 1.61 NRS
+        return 1; // No conversion needed if the currencies are the same
+    }
+
 }
