@@ -1,9 +1,12 @@
 @namespace WiseWallet.Components.Layout
+@using WiseWallet.Models
+@using System.Text.Json;
+@using WiseWallet.Services
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container-fluid">
         <!-- Left: Project Name -->
-        <a class="navbar-brand" asp-controller="Home" asp-action="Index" href="/dashboard">Wise Wallet</a>
+        <a class="navbar-brand fw-bold text-orange" asp-controller="Home" asp-action="Index" href="/dashboard">Wise Wallet</a>
 
         <!-- Navbar Toggler -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -14,48 +17,122 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link text-orange" asp-controller="Transaction" asp-action="Index" href="/transaction">Transaction</a>
+                    <a class="nav-link text-orange fw-semibold" asp-controller="Transaction" asp-action="Index" href="/transaction">Transaction</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-orange" asp-controller="Debt" asp-action="ViewDebt" href="/debt">View Debt</a>
+                    <a class="nav-link text-orange fw-semibold" asp-controller="Debt" asp-action="ViewDebt" href="/debt">View Debt</a>
                 </li>
             </ul>
 
-            <!-- Right: Profile Circle -->
-            <div class="d-flex">
-                <div class="profile-circle">
-                    <i class="bi bi-person-fill"></i>
-                </div>
+            <!-- Right: Currency Section -->
+            <div class="d-flex align-items-center">
+                <select class="form-select me-2" @bind="SelectedCurrency" aria-label="Select Currency">
+                    <option value="NRS">Nepali Rs</option>
+                    <option value="INR">Indian Rs</option>
+                </select>
+                <button class="btn btn-orange" @onclick="SubmitCurrencyChange">Change</button>
             </div>
         </div>
     </div>
 </nav>
 
+<div class="container mt-3">
+    @if (!string.IsNullOrEmpty(ChangeMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @ChangeMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+</div>
+
 <style>
-    /* Navbar bottom shadow */
     .navbar {
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    /* Orange nav-link */
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+
     .nav-link {
         color: orange !important;
-        font-weight: 500; /* Optional: Make the link slightly bold */
+        font-weight: 500;
     }
 
-    /* Profile circle icon size */
-    .profile-circle {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f8f9fa; /* Light gray background */
+    .btn-orange {
+        background-color: orange;
+        color: white;
+        border: none;
+        font-weight: bold;
     }
 
-    .profile-circle i {
-        font-size: 1.5rem; /* Increase the icon size */
-        color: #6c757d; /* Gray color for the icon */
+        .btn-orange:hover {
+            background-color: darkorange;
+            color: white;
+        }
+
+    .form-select {
+        width: 200px;
+    }
+
+    .btn {
+        min-width: 100px;
     }
 </style>
+
+@code {
+    private string SelectedCurrency = "NRS"; // Default or fetched value
+    private int CurrentUserId;
+    private string ChangeMessage;
+
+    protected override void OnInitialized()
+    {
+        // Get the logged-in user's information
+        var loggedInUser = LoginServices.GetLoggedInUser();
+        if (loggedInUser != null)
+        {
+            CurrentUserId = loggedInUser.UserId; // Set the current user ID
+            SelectedCurrency = loggedInUser.CurrencyType; // Pre-select user's current currency
+        }
+    }
+
+    private async void SubmitCurrencyChange()
+    {
+        UpdateCurrencyTypeInJson(SelectedCurrency);
+        await Task.Delay(2000); // Wait for 2 seconds
+        ChangeMessage = null;   // Clear the message
+        StateHasChanged();      // Trigger UI update
+    }
+
+    private void UpdateCurrencyTypeInJson(string newCurrency)
+    {
+        var loggedInUser = LoginServices.GetLoggedInUser();
+        if (loggedInUser != null && loggedInUser.UserId == CurrentUserId)
+        {
+            string FilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "WiseWallet", "DataStore.json");
+
+            // Read existing data
+            List<UserModel> users = new List<UserModel>();
+            if (File.Exists(FilePath))
+            {
+                var fileContent = File.ReadAllText(FilePath);
+                users = JsonSerializer.Deserialize<List<UserModel>>(fileContent) ?? new List<UserModel>();
+            }
+
+            // Update the currency type for the logged-in user
+            var userToUpdate = users.FirstOrDefault(u => u.UserId == CurrentUserId);
+            if (userToUpdate != null)
+            {
+                userToUpdate.CurrencyType = newCurrency;
+
+                // Serialize the updated list back to JSON
+                string updatedJson = JsonSerializer.Serialize(users, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(FilePath, updatedJson);
+
+                // Show success message
+                ChangeMessage = $"Currency changed to {newCurrency}.";
+            }
+        }
+    }
+}
